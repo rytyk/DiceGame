@@ -25,6 +25,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
+    private long lastShakeTime;
+
+    private boolean isShaking = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,9 +94,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             return;
         }
 
-        tvX.setText("" + event.values[0]);
-        tvY.setText("" + event.values[1]);
-        tvZ.setText("" + event.values[2]);
+        double X = event.values[0];
+        double Y = event.values[1];
+        double Z = event.values[2];
 
+        double acceleration = Math.sqrt(X*X + Y*Y + Z*Z);
+
+        if (acceleration > 15){
+            lastShakeTime = System.currentTimeMillis();
+
+            if (!isShaking){
+                isShaking = true;
+                tvStatus.setText("ТРЯСІТЬ");
+
+                tvDice1.setText("?");
+                tvDice2.setText("?");
+                tvSum.setText("?");
+            }
+        }
+        if (isShaking){
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastShakeTime > 500){
+                isShaking = false;
+                rollDice();
+            }
+        }
     }
 }
